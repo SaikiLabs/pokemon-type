@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Tipos Pokémon · Gen 3</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="gba-frame">
+    <header>
+      <div>
+        <h1>Pokémon <span>Type Calculator</span></h1>
+        <p class="subtitle">Kanto · Johto · Hoenn (1–386)</p>
+      </div>
+      <div class="lang-toggle">
+        <button id="lang-es" type="button">ES</button>
+        <button id="lang-en" type="button">EN</button>
+      </div>
+    </header>
+
+    <section class="search-box dialog-box">
+      <form id="search-form">
+        <input id="search-input" list="pokemon-list" autocomplete="off"
+               placeholder="Nombre o nº (1–386)...">
+        <datalist id="pokemon-list"></datalist>
+        <button type="submit" id="search-btn">Buscar</button>
+      </form>
+    </section>
+
+    <section id="battle-scene" class="battle-scene hidden">
+      <div class="info-box">
+        <div class="info-name">
+          <span id="info-name"></span>
+          <span id="info-lv"></span>
+        </div>
+        <div id="info-types"></div>
+        <div class="hp-track"><div id="hp-fill" class="hp-fill"></div></div>
+        <div class="info-id" id="info-id"></div>
+      </div>
+      <div class="platform enemy-platform"></div>
+      <div class="platform player-platform"></div>
+      <img id="enemy-sprite" class="sprite enemy-sprite" alt="">
+      <img id="player-sprite" class="sprite player-sprite" alt="">
+    </section>
+
+    <section id="message-box" class="dialog-box message-box">
+      <p id="message-text"></p>
+    </section>
+
+    <section id="stats-panel" class="panel dialog-box hidden">
+      <h2 id="stats-title"></h2>
+      <p class="sub" id="stats-sub"></p>
+      <div id="stats-body" class="stats-grid"></div>
+    </section>
+
+    <section id="defense-panel" class="panel dialog-box hidden">
+      <h2 id="defense-title"></h2>
+      <p class="sub" id="defense-sub"></p>
+      <div id="defense-body"></div>
+    </section>
+
+    <section id="offense-panel" class="panel dialog-box hidden">
+      <h2 id="offense-title"></h2>
+      <p class="sub" id="offense-sub"></p>
+      <div id="offense-body"></div>
+    </section>
+
+    <footer id="footer-text"></footer>
+  </div>
+
+  <script src="js/types.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
