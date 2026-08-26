@@ -11,28 +11,28 @@ const ZERO_EVS: EVs = { hp: 0, attack: 0, defense: 0, spAtk: 0, spDef: 0, speed:
 const CHARIZARD: Pokemon = {
   id: 6, nameEn: 'Charizard', nameEs: 'Charizard',
   types: ['fire', 'flying'],
-  spriteFront: null, spriteBack: null,
+  spriteFront: null, spriteBack: null, spriteAnimated: false,
   stats: { hp: 78, attack: 84, defense: 78, spAtk: 109, spDef: 85, speed: 100 }
 };
 
 const BLISSEY: Pokemon = {
   id: 242, nameEn: 'Blissey', nameEs: 'Blissey',
   types: ['normal'],
-  spriteFront: null, spriteBack: null,
+  spriteFront: null, spriteBack: null, spriteAnimated: false,
   stats: { hp: 255, attack: 10, defense: 10, spAtk: 75, spDef: 135, speed: 55 }
 };
 
 const CLEFABLE: Pokemon = {
   id: 36, nameEn: 'Clefable', nameEs: 'Clefable',
   types: ['fairy'],
-  spriteFront: null, spriteBack: null,
+  spriteFront: null, spriteBack: null, spriteAnimated: false,
   stats: { hp: 95, attack: 70, defense: 73, spAtk: 95, spDef: 90, speed: 60 }
 };
 
 const GARCHOMP: Pokemon = {
   id: 445, nameEn: 'Garchomp', nameEs: 'Garchomp',
   types: ['dragon', 'ground'],
-  spriteFront: null, spriteBack: null,
+  spriteFront: null, spriteBack: null, spriteAnimated: false,
   stats: { hp: 108, attack: 130, defense: 95, spAtk: 80, spDef: 85, speed: 102 }
 };
 

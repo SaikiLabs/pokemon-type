@@ -11,6 +11,11 @@
   --color-gba-ink: #282830;
 }
 
+@keyframes sprite-idle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
 body {
   margin: 0;
   background: linear-gradient(#3a7a26, #1e4414) fixed;

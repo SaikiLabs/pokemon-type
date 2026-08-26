@@ -43,6 +43,7 @@ export interface Pokemon {
   types: TypeName[];
   spriteFront: string | null;
   spriteBack: string | null;
+  spriteAnimated: boolean;
   stats: Stats;
   moves?: PokemonMove[];
 }

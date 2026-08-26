@@ -11,6 +11,7 @@ const CHARIZARD: Pokemon = {
   types: ['fire', 'flying'],
   spriteFront: null,
   spriteBack: null,
+  spriteAnimated: false,
   stats: { hp: 78, attack: 84, defense: 78, spAtk: 109, spDef: 85, speed: 100 }
 };
 

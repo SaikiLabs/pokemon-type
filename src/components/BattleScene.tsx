@@ -33,13 +33,17 @@ export function BattleScene({ pokemon }: { pokemon: Pokemon }) {
       <img
         src={pokemon.spriteFront ?? ''}
         alt={name}
-        className="absolute top-10 right-13 w-18 [image-rendering:pixelated] drop-shadow-[0_6px_4px_rgba(0,0,0,.25)] sm:top-11 sm:right-19 sm:w-23"
+        className={`absolute top-10 right-13 w-18 [image-rendering:pixelated] drop-shadow-[0_6px_4px_rgba(0,0,0,.25)] sm:top-11 sm:right-19 sm:w-23 ${
+          pokemon.spriteAnimated ? '' : 'animate-[sprite-idle_2s_ease-in-out_infinite]'
+        }`}
       />
       <img
         src={pokemon.spriteBack ?? pokemon.spriteFront ?? ''}
         alt={name}
         className={`absolute bottom-11 left-8 w-26 [image-rendering:pixelated] drop-shadow-[0_6px_4px_rgba(0,0,0,.25)] sm:bottom-12 sm:left-14 sm:w-33 ${
           pokemon.spriteBack ? '' : '-scale-x-100'
+        } ${
+          pokemon.spriteAnimated ? '' : 'animate-[sprite-idle_2s_ease-in-out_infinite_0.3s]'
         }`}
       />
     </section>

@@ -76,7 +76,9 @@ export function DualBattleScene({ attacker, defender, defenderHP = 1, defenderDa
       <img
         src={defender.spriteFront ?? ''}
         alt={displayName(defender, 'en')}
-        className="absolute top-6 right-10 w-20 [image-rendering:pixelated] drop-shadow-[0_6px_4px_rgba(0,0,0,.25)] sm:top-6 sm:right-14 sm:w-26"
+        className={`absolute top-6 right-10 w-20 [image-rendering:pixelated] drop-shadow-[0_6px_4px_rgba(0,0,0,.25)] sm:top-6 sm:right-14 sm:w-26 ${
+          defender.spriteAnimated ? '' : 'animate-[sprite-idle_2s_ease-in-out_infinite]'
+        }`}
       />
 
       {/* ── Fila inferior: Atacante ── */}
@@ -89,6 +91,8 @@ export function DualBattleScene({ attacker, defender, defenderHP = 1, defenderDa
         alt={displayName(attacker, 'en')}
         className={`absolute bottom-16 left-6 w-28 [image-rendering:pixelated] drop-shadow-[0_6px_4px_rgba(0,0,0,.25)] sm:bottom-18 sm:left-10 sm:w-36 ${
           attacker.spriteBack ? '' : '-scale-x-100'
+        } ${
+          attacker.spriteAnimated ? '' : 'animate-[sprite-idle_2s_ease-in-out_infinite_0.3s]'
         }`}
       />
 

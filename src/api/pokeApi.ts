@@ -158,24 +158,24 @@ function toTypeName(name: string): TypeName | null {
   return (POKEMON_TYPES as readonly string[]).includes(name) ? (name as TypeName) : null;
 }
 
-function selectSprites(sprites: RawPokemon['sprites']): { front: string | null; back: string | null } {
+function selectSprites(sprites: RawPokemon['sprites']): { front: string | null; back: string | null; animated: boolean } {
   const bw = sprites.versions?.['generation-v']?.['black-white'];
   const animated = bw?.animated;
   if (animated?.front_default) {
-    return { front: animated.front_default, back: animated.back_default ?? null };
+    return { front: animated.front_default, back: animated.back_default ?? null, animated: true };
   }
   if (bw?.front_default) {
-    return { front: bw.front_default, back: bw.back_default ?? null };
+    return { front: bw.front_default, back: bw.back_default ?? null, animated: false };
   }
   const dp = sprites.versions?.['generation-iv']?.['diamond-pearl'];
   if (dp?.front_default) {
-    return { front: dp.front_default, back: dp.back_default ?? null };
+    return { front: dp.front_default, back: dp.back_default ?? null, animated: false };
   }
   const frlg = sprites.versions?.['generation-iii']?.['firered-leafgreen'];
   if (frlg?.front_default) {
-    return { front: frlg.front_default, back: frlg.back_default ?? null };
+    return { front: frlg.front_default, back: frlg.back_default ?? null, animated: false };
   }
-  return { front: sprites.front_default, back: sprites.back_default ?? null };
+  return { front: sprites.front_default, back: sprites.back_default ?? null, animated: false };
 }
 
 async function getSpecies(id: number): Promise<{ es: string; en: string }> {
@@ -204,7 +204,7 @@ export async function getPokemon(query: string): Promise<Pokemon> {
   if (data.id > MAX_DEX) throw new PokeApiError('notfound');
 
   const species = await getSpecies(data.id);
-  const { front, back } = selectSprites(data.sprites);
+  const { front, back, animated } = selectSprites(data.sprites);
 
   let types: TypeName[] = data.types.map((t) => toTypeName(t.type.name)).filter((t): t is TypeName => t !== null);
   if (types.length === 0) types = ['normal'];
@@ -232,6 +232,7 @@ export async function getPokemon(query: string): Promise<Pokemon> {
     types,
     spriteFront: front,
     spriteBack: back,
+    spriteAnimated: animated,
     stats: {
       hp: rawStats.hp ?? 0,
       attack: rawStats.attack ?? 0,
