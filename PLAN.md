@@ -1,35 +1,56 @@
 # PLAN — Calculadora de Tipos Pokémon (estilo Gen 3)
 
-Calculadora de efectividad de tipos con estética GBA (FireRed/Emerald), vanilla JS, sin build.
+Calculadora de efectividad de tipos con estética GBA (FireRed/Emerald).
+**v0.2: migrada a React + Vite + TypeScript + Tailwind v4** (reescritura limpia sobre el prototipo vanilla, commit `5ad8ec3`).
 
 ## Alcance
 - **Solo Pokémon de las generaciones 1–3 (IDs 1–386).** Toda búsqueda fuera de rango se rechaza.
-- Sin frameworks ni empaquetado: abrir `index.html` directamente en el navegador.
+- Stack: React 19 · Vite · TypeScript strict · Tailwind v4 (`@theme` con paleta GBA) · Vitest.
+
+## Comandos
+```
+npm install        instalar dependencias
+npm run dev        servidor de desarrollo
+npm test           vitest run (motor + API + narrativa)
+npm run build      tsc (strict) + build producción → dist/
+```
 
 ## Decisiones
 | Detalle | Elección |
 |---|---|
-| Idioma | Bilingüe ES/EN con toggle, persistido en `localStorage` (`ptc-lang`) |
+| Idioma | Bilingüe ES/EN con toggle; contexto React + `localStorage` (`ptc-lang`) |
 | Búsqueda | Nombre inglés o número; datalist con los 386 nombres |
-| Nombres mostrados | Localizados vía `/pokemon-species/{id}` (`names[]`) |
-| Tabla de efectividad | Hardcodeada en `js/types.js` (17 tipos, sin Hada/Fairy) |
-| Tipos Hada modernos | Corregidos a su tipado de Gen 3 (`GEN3_TYPE_FIXES`: Clefairy→Normal, Gardevoir→Psíquico, Mawile→Acero, etc.) |
-| Sprites | `generation-iii.firered-leafgreen` front/back; fallback a `front_default`/flip CSS |
-| Caché | `Map` en memoria + `localStorage` (`ptc-cache-v1`); última búsqueda en `ptc-last` |
+| Nombres mostrados | Localizados vía `/pokemon-species/{id}` |
+| Tabla de efectividad | Hardcodeada y tipada en `src/engine/effectiveness.ts` (17 tipos, sin Hada) |
+| Tipos Hada modernos | Corregidos a su tipado Gen 3 (`GEN3_TYPE_FIXES`: Clefairy→Normal, Gardevoir→Psíquico, Mawile→Acero… 18 líneas evolutivas) |
+| Sprites | `generation-iii.firered-leafgreen` front/back; fallback a default / flip CSS |
+| Caché | Map en memoria + `localStorage` (`ptc-cache-v1`); doble clave nombre/id; última búsqueda en `ptc-last` |
+| Estado | `useState`/Context nativo — sin librerías externas |
 
 ## Estructura
 ```
-index.html        Escena de batalla, cajas de diálogo, paneles
-css/styles.css    Paleta FireRed/Emerald, tipografía Press Start 2P
-js/types.js       Tabla 17×17, análisis defensivo/ofensivo, clasificación
-js/api.js         PokéAPI + caché memoria/localStorage + normalización de entrada
-js/ui.js          Diccionario i18n ES/EN, render, efecto máquina de escribir
-js/main.js        Estado global, eventos, init
+index.html                     entrada Vite (fuente Press Start 2P)
+vite.config.ts                 react + tailwindcss plugins, entorno de test node
+src/
+├── domain/pokemon.ts          TypeName(17), Pokemon, Category, Stats, MAX_DEX
+├── domain/typeMeta.ts         colores clásicos + nombres ES/EN por tipo
+├── engine/effectiveness.ts    matriz 17×17, multiplicadores, análisis def/of
+├── engine/effectiveness.test.ts     casos canónicos (Charizard, Swampert, Magnemite…)
+├── api/pokeApi.ts             fetch + caché + fixes Hada + normalizeQuery
+├── api/pokeApi.test.ts        mocks de fetch/localStorage: guards, caché, fixes
+├── i18n/strings.ts            diccionarios ES/EN tipados + joinList/capitalize
+├── i18n/narrative.ts          mensajes estilo diálogo ("¡Charizard es DÉBIL ante AGUA!")
+├── i18n/narrative.test.ts
+├── hooks/usePokemon.ts        máquina idle→loading→success|error
+├── hooks/useLanguage.tsx      contexto de idioma persistido
+├── hooks/useTypewriter.ts     efecto máquina de escribir
+└── components/                DialogBox, TypeBadge, CategoryRow, EffectivenessPanel,
+                               Header, SearchBar, BattleScene, StatsPanel,
+                               MessageDialog, Footer
 ```
 
 ## Motor de efectividad
 Multiplicador = producto del tipo atacante contra cada tipo defensor.
-Categorías (clave → ×mult):
 
 | Clave | Mult | Defensivo ES/EN | Ofensivo ES/EN |
 |---|---|---|---|
@@ -40,35 +61,30 @@ Categorías (clave → ×mult):
 | quarter | ×0.25 | Muy resistente / Very resistant | Casi sin efecto / Barely effective |
 | immune | ×0 | Inmune / Immune | Sin efecto / No effect |
 
-Análisis bidireccional:
-- **Defensivo**: los 17 tipos atacantes vs los tipos del Pokémon.
-- **Ofensivo**: los tipos del Pokémon vs los 17 defensores (mejor multiplicador disponible).
+Análisis bidireccional: defensivo (17 atacantes vs tus tipos) y ofensivo (tus tipos vs 17 defensores, mejor movimiento disponible).
 
 ## API usada
-- `GET /api/v2/pokemon/{nombre-en|id}` → tipos, sprites, stats base
+- `GET /api/v2/pokemon/{nombre-en|id}` → tipos, sprites FRLG, stats base
 - `GET /api/v2/pokemon-species/{id}` → nombre localizado ES/EN
 - `GET /api/v2/pokemon?limit=386` → lista para el datalist
 
-Entrada normalizada: minúsculas, sin puntos/apóstrofes, espacios→guiones (`Mr. Mime`→`mr-mime`).
+Entrada normalizada: minúsculas, sin puntos/apóstrofes, espacios→guiones colapsados, ♀/♂→-f/-m (`Mr. Mime`→`mr-mime`, `Nidoran♀`→`nidoran-f`).
 
 ## UI Gen 3
-- Paleta FireRed/Emerald: fondo verde esmeralda, cajas beige `#f8f8d0` con doble borde azul.
-- Tipografía *Press Start 2P* (Google Fonts) con fallback monospace.
-- Escena de batalla: plataformas ovaladas, sprite frontal arriba-derecha y trasero abajo-izquierda, barra HP decorativa.
-- Insignias de tipo con colores clásicos y multiplicador.
-- Resultados narrados con efecto máquina de escribir: *"¡Charizard es DÉBIL ante AGUA!"*.
-- Stats base como barras horizontales estilo GBA.
+Paleta FireRed/Emerald como tokens `@theme` (`--color-gba-*`), cajas beige con doble borde azul (`DialogBox`), escena de batalla con plataformas ovaladas y sprites pixelados, insignias de tipo con colores clásicos, stats como barras GBA, mensajes narrados con typewriter. Responsive (breakpoint sm).
 
-## Verificación manual (abrir index.html)
-Casos canónicos:
-- [ ] `charizard` → MUY DÉBIL ×4 ROCA · DÉBIL ×2 AGUA/ELÉCTRICO · INMUNE a TIERRA
-- [ ] `swampert` → INMUNE a ELÉCTRICO · MUY DÉBIL ×4 PLANTA
-- [ ] `magnemite` → MUY DÉBIL ×4 TIERRA · DÉBIL ×2 FUEGO/LUCHA
-- [ ] `umbreon` → INMUNE a PSÍQUICO · DÉBIL a LUCHA
-- [ ] `gastly` → INMUNE a NORMAL y LUCHA
-- [ ] `25` → pikachu · `CHARIZARD` (mayúsculas) funciona
-- [ ] `387` o `1000` → mensaje "solo Gen 1–3"
-- [ ] `xyzzy` → mensaje "no existe"
-- [ ] Toggle ES/EN re-renderiza todo sin recargar; recargar mantiene idioma y último Pokémon (caché instantánea)
+## Verificación
+- [x] `npm test` — 39 tests en verde (14 matchups canónicos, clasificación, agrupación, normalización, guards gen3/notfound/network, caché doble clave, fixes Hada, narrativa ES/EN)
+- [x] `npm run build` — TypeScript strict sin errores
+- Casos manuales (`npm run dev`):
+  - [ ] `charizard` → MUY DÉBIL ×4 ROCA · DÉBIL ×2 AGUA/ELÉCTRICO · INMUNE a TIERRA
+  - [ ] `swampert` → INMUNE a ELÉCTRICO · MUY DÉBIL ×4 PLANTA
+  - [ ] `magnemite` → MUY DÉBIL ×4 TIERRA · DÉBIL ×2 FUEGO/LUCHA
+  - [ ] `umbreon` → INMUNE a PSÍQUICO · DÉBIL a LUCHA
+  - [ ] `gastly` → INMUNE a NORMAL y LUCHA
+  - [ ] `25` → pikachu · `CHARIZARD` (mayúsculas) funciona
+  - [ ] `387` o `1000` → mensaje "solo Gen 1–3" · `xyzzy` → "no existe"
+  - [ ] Toggle ES/EN re-renderiza sin recargar; recargar mantiene idioma y último Pokémon
 
-Sintaxis JS validada con `node --check js/*.js`.
+## Roadmap (motivo de la migración a React)
+Comparador de 2 Pokémon y/o analizador de equipo: el estado se extenderá a lista de slots reutilizando `usePokemon` por slot; el motor y la API ya son agnósticos del número de Pokémon.

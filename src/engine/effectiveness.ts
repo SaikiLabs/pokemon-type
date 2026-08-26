@@ -1,12 +1,6 @@
-'use strict';
+import { POKEMON_TYPES, CATEGORY_ORDER, type Category, type EffectivenessEntry, type Mult, type OffensiveEntry, type TypeName } from '../domain/pokemon';
 
-const TYPES = [
-  'normal', 'fire', 'water', 'electric', 'grass', 'ice', 'fighting',
-  'poison', 'ground', 'flying', 'psychic', 'bug', 'rock', 'ghost',
-  'dragon', 'dark', 'steel'
-];
-
-const TYPE_CHART = {
+export const TYPE_CHART: Record<TypeName, Partial<Record<TypeName, Mult>>> = {
   normal:   { ghost: 0 },
   fire:     { fire: .5, water: .5, grass: 2, ice: 2, bug: 2, rock: .5, dragon: .5, steel: 2 },
   water:    { fire: 2, water: .5, grass: .5, ground: 2, rock: 2, dragon: .5 },
@@ -26,43 +20,16 @@ const TYPE_CHART = {
   steel:    { fire: .5, water: .5, electric: .5, ice: 2, rock: 2, steel: .5 }
 };
 
-const TYPE_COLORS = {
-  normal: '#A8A878', fire: '#F08030', water: '#6890F0', electric: '#F8D030',
-  grass: '#78C850', ice: '#98D8D8', fighting: '#C03028', poison: '#A040A0',
-  ground: '#E0C068', flying: '#A890F0', psychic: '#F85888', bug: '#A8B820',
-  rock: '#B8A038', ghost: '#705898', dragon: '#7038F8', dark: '#705848',
-  steel: '#B8B8D0'
-};
-
-const TYPE_NAMES = {
-  es: {
-    normal: 'Normal', fire: 'Fuego', water: 'Agua', electric: 'Eléctrico',
-    grass: 'Planta', ice: 'Hielo', fighting: 'Lucha', poison: 'Veneno',
-    ground: 'Tierra', flying: 'Volador', psychic: 'Psíquico', bug: 'Bicho',
-    rock: 'Roca', ghost: 'Fantasma', dragon: 'Dragón', dark: 'Siniestro',
-    steel: 'Acero'
-  },
-  en: {
-    normal: 'Normal', fire: 'Fire', water: 'Water', electric: 'Electric',
-    grass: 'Grass', ice: 'Ice', fighting: 'Fighting', poison: 'Poison',
-    ground: 'Ground', flying: 'Flying', psychic: 'Psychic', bug: 'Bug',
-    rock: 'Rock', ghost: 'Ghost', dragon: 'Dragon', dark: 'Dark',
-    steel: 'Steel'
-  }
-};
-
-const CATEGORY_ORDER = ['quad', 'double', 'neutral', 'half', 'quarter', 'immune'];
-
-function getMultiplier(atkType, defTypes) {
+export function getMultiplier(atkType: TypeName, defTypes: readonly TypeName[]): number {
   let mult = 1;
   for (const def of defTypes) {
-    const row = TYPE_CHART[atkType] || {};
-    mult *= (row[def] !== undefined) ? row[def] : 1;
+    const m = TYPE_CHART[atkType][def];
+    mult *= m !== undefined ? m : 1;
   }
   return mult;
 }
 
-function classify(mult) {
+export function classify(mult: number): Category {
   if (mult === 0) return 'immune';
   if (mult < 0.5) return 'quarter';
   if (mult < 1) return 'half';
@@ -71,16 +38,14 @@ function classify(mult) {
   return 'quad';
 }
 
-function analyzeDefensive(defTypes) {
-  return TYPES.map(function (atk) {
-    return { type: atk, mult: getMultiplier(atk, defTypes) };
-  });
+export function analyzeDefensive(defTypes: readonly TypeName[]): EffectivenessEntry[] {
+  return POKEMON_TYPES.map((atk) => ({ type: atk, mult: getMultiplier(atk, defTypes) }));
 }
 
-function analyzeOffensive(atkTypes) {
-  return TYPES.map(function (def) {
+export function analyzeOffensive(atkTypes: readonly TypeName[]): OffensiveEntry[] {
+  return POKEMON_TYPES.map((def) => {
     let best = 0;
-    let bestAtk = atkTypes[0];
+    let bestAtk: TypeName = atkTypes[0];
     for (const atk of atkTypes) {
       const m = getMultiplier(atk, [def]);
       if (m > best) {
@@ -92,13 +57,13 @@ function analyzeOffensive(atkTypes) {
   });
 }
 
-function groupByCategory(entries) {
-  const groups = {};
+export function groupByCategory<T extends { mult: number }>(entries: readonly T[]): Record<Category, T[]> {
+  const groups = {} as Record<Category, T[]>;
   for (const cat of CATEGORY_ORDER) groups[cat] = [];
   for (const e of entries) groups[classify(e.mult)].push(e);
   return groups;
 }
 
-function formatMult(mult) {
-  return '×' + mult;
+export function formatMult(mult: number): string {
+  return '×' + String(mult);
 }

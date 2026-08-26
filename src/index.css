@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --font-pixel: "Press Start 2P", monospace;
+
+  --color-gba-navy: #181860;
+  --color-gba-blue: #5858c8;
+  --color-gba-blue-dark: #303090;
+  --color-gba-blue-light: #b8b8f0;
+  --color-gba-beige: #f8f8d0;
+  --color-gba-ink: #282830;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(#3a7a26, #1e4414) fixed;
+}
