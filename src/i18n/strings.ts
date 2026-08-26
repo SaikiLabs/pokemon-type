@@ -9,7 +9,6 @@ export interface Strings {
   loading: string;
   empty: string;
   notFound: string;
-  gen3: string;
   network: string;
   statsTitle: string;
   statsSub: string;
@@ -23,20 +22,47 @@ export interface Strings {
   catOff: Record<Category, string>;
   noNotes: string;
   footer: string;
+  tabAnalyze: string;
+  tabSimulate: string;
+  level: string;
+  nature: string;
+  ivs: string;
+  evs: string;
+  ivTotal: string;
+  evTotal: string;
+  calcDamage: string;
+  attacker: string;
+  defender: string;
+  selectMove: string;
+  estimatedDmg: string;
+  effectiveness: string;
+  stabBonus: string;
+  ohko: string;
+  twoHko: string;
+  threeHko: string;
+  movesTitle: string;
+  movesSub: string;
+  power: string;
+  accuracy: string;
+  category: string;
+  physical: string;
+  special: string;
+  status: string;
+  priority: string;
+  bestMoves: string;
 }
 
 export const STRINGS: Record<Lang, Strings> = {
   es: {
-    docTitle: 'Calculadora de Tipos Pokémon · Gen 3',
-    searchPlaceholder: 'Nombre o nº (1–386)...',
+    docTitle: 'Calculadora Pokémon Universal',
+    searchPlaceholder: 'Nombre o nº (1–1025)...',
     searchBtn: 'Buscar',
     loading: 'Buscando datos...',
     empty: '¡Escribe un nombre o número para buscar!',
     notFound: '¡Ese Pokémon no existe! Prueba con otro nombre o número.',
-    gen3: '¡Solo están disponibles los Pokémon de la 1ª a la 3ª generación (nº 1–386)!',
     network: 'No se pudo conectar con PokéAPI. Inténtalo de nuevo.',
-    statsTitle: 'ESTADÍSTICAS BASE',
-    statsSub: 'Valores base del Pokémon:',
+    statsTitle: 'ESTADÍSTICAS',
+    statsSub: 'Base → Calculadas con IVs/EVs/Nivel:',
     defTitle: 'ANÁLISIS DEFENSIVO',
     defSub: 'Daño que RECIBE según el tipo del atacante:',
     offTitle: 'ANÁLISIS OFENSIVO',
@@ -67,19 +93,46 @@ export const STRINGS: Record<Lang, Strings> = {
       quad: 'DEVASTADOR'
     },
     noNotes: 'No tiene debilidades ni resistencias destacables.',
-    footer: 'Datos: PokéAPI · Proyecto fan sin ánimo de lucro · Pokémon © Nintendo / Game Freak'
+    footer: 'Datos: PokéAPI · Proyecto fan sin ánimo de lucro · Pokémon © Nintendo / Game Freak',
+    tabAnalyze: 'ANALIZAR',
+    tabSimulate: 'SIMULAR',
+    level: 'NIVEL',
+    nature: 'NATURALEZA',
+    ivs: 'IVs',
+    evs: 'EVs',
+    ivTotal: 'Total IVs',
+    evTotal: 'Total EVs',
+    calcDamage: 'CALCULAR DAÑO',
+    attacker: 'ATACANTE',
+    defender: 'DEFENSOR',
+    selectMove: 'Seleccionar movimiento',
+    estimatedDmg: 'DAÑO ESTIMADO',
+    effectiveness: 'EFECTIVIDAD',
+    stabBonus: 'STAB',
+    ohko: 'GOLPE LETAL',
+    twoHko: '2 GOLPES',
+    threeHko: '3 GOLPES',
+    movesTitle: 'MOVIMIENTOS',
+    movesSub: 'Movimientos aprendidos:',
+    power: 'POT.',
+    accuracy: 'PREC.',
+    category: 'CATEG.',
+    physical: 'FÍSICO',
+    special: 'ESP.',
+    status: 'ESTADO',
+    priority: 'PRIOR.',
+    bestMoves: 'MEJORES MOVIMIENTOS'
   },
   en: {
-    docTitle: 'Pokémon Type Calculator · Gen 3',
-    searchPlaceholder: 'Name or № (1–386)...',
+    docTitle: 'Universal Pokémon Calculator',
+    searchPlaceholder: 'Name or № (1–1025)...',
     searchBtn: 'Search',
     loading: 'Fetching data...',
     empty: 'Type a name or number to search!',
     notFound: "That Pokémon doesn't exist! Try another name or number.",
-    gen3: 'Only Gen 1–3 Pokémon (№ 1–386) are available!',
     network: 'Could not reach PokéAPI. Please try again.',
-    statsTitle: 'BASE STATS',
-    statsSub: 'Base values of the Pokémon:',
+    statsTitle: 'STATS',
+    statsSub: 'Base → Calculated with IVs/EVs/Level:',
     defTitle: 'DEFENSIVE ANALYSIS',
     defSub: 'Damage it TAKES based on attacker type:',
     offTitle: 'OFFENSIVE ANALYSIS',
@@ -110,7 +163,35 @@ export const STRINGS: Record<Lang, Strings> = {
       quad: 'DEVASTATING'
     },
     noNotes: 'It has no notable weaknesses or resistances.',
-    footer: 'Data: PokéAPI · Non-profit fan project · Pokémon © Nintendo / Game Freak'
+    footer: 'Data: PokéAPI · Non-profit fan project · Pokémon © Nintendo / Game Freak',
+    tabAnalyze: 'ANALYZE',
+    tabSimulate: 'SIMULATE',
+    level: 'LEVEL',
+    nature: 'NATURE',
+    ivs: 'IVs',
+    evs: 'EVs',
+    ivTotal: 'IV Total',
+    evTotal: 'EV Total',
+    calcDamage: 'CALCULATE DAMAGE',
+    attacker: 'ATTACKER',
+    defender: 'DEFENDER',
+    selectMove: 'Select a move',
+    estimatedDmg: 'ESTIMATED DAMAGE',
+    effectiveness: 'EFFECTIVENESS',
+    stabBonus: 'STAB',
+    ohko: 'ONE-HIT KO',
+    twoHko: '2-HIT KO',
+    threeHko: '3-HIT KO',
+    movesTitle: 'MOVES',
+    movesSub: 'Moves learned:',
+    power: 'PWR',
+    accuracy: 'ACC',
+    category: 'CLASS',
+    physical: 'PHYS',
+    special: 'SPEC',
+    status: 'STATUS',
+    priority: 'PRIOR',
+    bestMoves: 'BEST MOVES'
   }
 };
 

@@ -50,6 +50,16 @@ const CHARIZARD = {
     front_default: 'https://raw.example/charizard-front.png',
     back_default: 'https://raw.example/charizard-back.png',
     versions: {
+      'generation-v': {
+        'black-white': {
+          animated: {
+            front_default: 'bw-animated-front.png',
+            back_default: 'bw-animated-back.png'
+          },
+          front_default: 'bw-front.png',
+          back_default: 'bw-back.png'
+        }
+      },
       'generation-iii': {
         'firered-leafgreen': {
           front_default: 'frlg-front.png',
@@ -67,7 +77,7 @@ const SPECIES_ES_EN = {
   ]
 };
 
-const CLEFAIRY_MODERN = {
+const CLEFAIRY = {
   id: 35,
   name: 'clefairy',
   types: [{ slot: 1, type: { name: 'fairy' } }],
@@ -95,18 +105,22 @@ describe('normalizeQuery', () => {
     expect(normalizeQuery(input)).toBe(expected);
   });
 
-  it('rechaza números fuera del rango Gen 3', () => {
-    expect(() => normalizeQuery('1000')).toThrowError(PokeApiError);
+  it('rechaza números fuera del rango', () => {
+    expect(() => normalizeQuery('1026')).toThrowError(PokeApiError);
     try {
-      normalizeQuery('1000');
+      normalizeQuery('1026');
     } catch (e) {
-      expect((e as PokeApiError).code).toBe('gen3');
+      expect((e as PokeApiError).code).toBe('notfound');
     }
+  });
+
+  it('acepta IDs dentro del rango (1025)', () => {
+    expect(normalizeQuery('1025')).toBe('1025');
   });
 });
 
 describe('getPokemon', () => {
-  it('mapea tipos, sprites FRLG y stats de la respuesta cruda', async () => {
+  it('mapea tipos, sprites BW animados y stats', async () => {
     const fetchMock = stubFetch((url) => {
       if (url.includes('/pokemon-species/')) return { json: SPECIES_ES_EN };
       return { json: CHARIZARD };
@@ -116,8 +130,8 @@ describe('getPokemon', () => {
     expect(p.id).toBe(6);
     expect(p.nameEs).toBe('Charizard');
     expect(p.types).toEqual(['fire', 'flying']);
-    expect(p.spriteFront).toBe('frlg-front.png');
-    expect(p.spriteBack).toBe('frlg-back.png');
+    expect(p.spriteFront).toBe('bw-animated-front.png');
+    expect(p.spriteBack).toBe('bw-animated-back.png');
     expect(p.stats).toEqual({ hp: 78, attack: 84, defense: 78, spAtk: 109, spDef: 85, speed: 100 });
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
@@ -132,13 +146,13 @@ describe('getPokemon', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it('corrige el tipo Hada moderno a su tipado de Gen 3', async () => {
+  it('mantiene el tipo Hada moderno de la API', async () => {
     stubFetch((url) => {
       if (url.includes('/pokemon-species/')) return { json: { names: [] } };
-      return { json: CLEFAIRY_MODERN };
+      return { json: CLEFAIRY };
     });
     const p = await getPokemon('clefairy');
-    expect(p.types).toEqual(['normal']);
+    expect(p.types).toEqual(['fairy']);
   });
 
   it('lanza notfound ante 404', async () => {
@@ -146,9 +160,12 @@ describe('getPokemon', () => {
     await expect(getPokemon('xyzzy')).rejects.toMatchObject({ code: 'notfound' });
   });
 
-  it('lanza gen3 si el id devuelto excede el rango', async () => {
-    stubFetch(() => ({ json: { ...CHARIZARD, id: 400, name: 'futuremon' } }));
-    await expect(getPokemon('futuremon')).rejects.toMatchObject({ code: 'gen3' });
+  it('lanza notfound si el id devuelto excede el rango', async () => {
+    stubFetch((url) => {
+      if (url.includes('/pokemon-species/')) return { json: { names: [] } };
+      return { json: { ...CHARIZARD, id: 2000, name: 'futuremon' } };
+    });
+    await expect(getPokemon('futuremon')).rejects.toMatchObject({ code: 'notfound' });
   });
 
   it('lanza network si fetch falla', async () => {

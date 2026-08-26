@@ -17,7 +17,8 @@ export const TYPE_COLORS: Record<TypeName, string> = {
   ghost: '#705898',
   dragon: '#7038F8',
   dark: '#705848',
-  steel: '#B8B8D0'
+  steel: '#B8B8D0',
+  fairy: '#EE99AC'
 };
 
 export const TYPE_NAMES = {
@@ -38,7 +39,8 @@ export const TYPE_NAMES = {
     ghost: 'Fantasma',
     dragon: 'Dragón',
     dark: 'Siniestro',
-    steel: 'Acero'
+    steel: 'Acero',
+    fairy: 'Hada'
   },
   en: {
     normal: 'Normal',
@@ -57,6 +59,7 @@ export const TYPE_NAMES = {
     ghost: 'Ghost',
     dragon: 'Dragon',
     dark: 'Dark',
-    steel: 'Steel'
+    steel: 'Steel',
+    fairy: 'Fairy'
   }
 } as const satisfies Record<'es' | 'en', Record<TypeName, string>>;

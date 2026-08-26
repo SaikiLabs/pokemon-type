@@ -6,6 +6,7 @@ import { usePokemon, type SearchError } from './hooks/usePokemon';
 import { buildNarrative, displayName } from './i18n/narrative';
 import type { Strings } from './i18n/strings';
 import { BattleScene } from './components/BattleScene';
+import { BattleSimulator } from './components/BattleSimulator';
 import { EffectivenessPanel } from './components/EffectivenessPanel';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
@@ -27,12 +28,12 @@ function errorMessage(t: Strings, code: SearchError): string {
       return t.empty;
     case 'notfound':
       return t.notFound;
-    case 'gen3':
-      return t.gen3;
     default:
       return t.network;
   }
 }
+
+type Tab = 'analyze' | 'simulate';
 
 export default function App() {
   return (
@@ -48,6 +49,8 @@ function Calculator() {
   const [initialQuery] = useState<string>(readLastId);
   const search = usePokemon(initialQuery);
   const busy = search.status === 'loading';
+  const [tab, setTab] = useState<Tab>('analyze');
+  const [defenderQuery, setDefenderQuery] = useState('');
 
   useEffect(() => {
     let alive = true;
@@ -81,9 +84,37 @@ function Calculator() {
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-3 py-6 font-pixel">
       <Header />
       <SearchBar names={names} busy={busy} onSubmit={search.search} />
+
+      {/* Tab Switcher */}
+      {search.pokemon && (
+        <div className="flex gap-2">
+          <button
+            onClick={() => setTab('analyze')}
+            className={`flex-1 rounded-lg border-3 py-2 text-[10px] font-normal transition-colors ${
+              tab === 'analyze'
+                ? 'border-gba-blue bg-gba-blue text-white shadow-[0_2px_0_0_var(--color-gba-navy)]'
+                : 'border-gba-blue-dark bg-gba-beige text-gba-blue-dark hover:bg-gba-blue-light'
+            }`}
+          >
+            {t.tabAnalyze}
+          </button>
+          <button
+            onClick={() => setTab('simulate')}
+            className={`flex-1 rounded-lg border-3 py-2 text-[10px] font-normal transition-colors ${
+              tab === 'simulate'
+                ? 'border-gba-blue bg-gba-blue text-white shadow-[0_2px_0_0_var(--color-gba-navy)]'
+                : 'border-gba-blue-dark bg-gba-beige text-gba-blue-dark hover:bg-gba-blue-light'
+            }`}
+          >
+            {t.tabSimulate}
+          </button>
+        </div>
+      )}
+
       {search.pokemon && <BattleScene pokemon={search.pokemon} />}
       <MessageDialog text={message} />
-      {search.pokemon && (
+
+      {search.pokemon && tab === 'analyze' && (
         <>
           <StatsPanel pokemon={search.pokemon} />
           <EffectivenessPanel
@@ -104,7 +135,42 @@ function Calculator() {
           />
         </>
       )}
+
+      {search.pokemon && tab === 'simulate' && (
+        <>
+          <StatsPanel pokemon={search.pokemon} />
+          <SearchBar
+            names={names}
+            busy={busy}
+            onSubmit={(q) => setDefenderQuery(q)}
+            placeholder={t.defender + '...'}
+          />
+          {defenderQuery && (
+            <SimulatorWrapper attackerQuery={search.pokemon.nameEn} defenderQuery={defenderQuery} />
+          )}
+          {!defenderQuery && (
+            <div className="rounded-[10px] border-4 border-gba-blue bg-gba-beige p-4 text-center shadow-[0_0_0_4px_var(--color-gba-navy),inset_0_0_0_2px_var(--color-gba-blue-light)]">
+              <p className="text-[9px] text-neutral-500">{t.selectMove}</p>
+            </div>
+          )}
+        </>
+      )}
+
       <Footer />
     </div>
   );
+}
+
+function SimulatorWrapper({ attackerQuery, defenderQuery }: { attackerQuery: string; defenderQuery: string }) {
+  const attacker = usePokemon(attackerQuery);
+  const defender = usePokemon(defenderQuery);
+
+  if (attacker.status === 'loading' || defender.status === 'loading') {
+    return <div className="text-[9px] text-neutral-500">Loading...</div>;
+  }
+  if (!attacker.pokemon || !defender.pokemon) {
+    return <div className="text-[9px] text-neutral-500">Could not load Pokemon data.</div>;
+  }
+
+  return <BattleSimulator attacker={attacker.pokemon} defender={defender.pokemon} />;
 }

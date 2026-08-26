@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { analyzeDefensive, classify, getMultiplier, groupByCategory } from './effectiveness';
 
-describe('getMultiplier (casos canónicos Gen 3)', () => {
+describe('getMultiplier (casos canónicos)', () => {
   const cases: Array<[string, Parameters<typeof getMultiplier>, number]> = [
     ['charizard × roca', ['rock', ['fire', 'flying']], 4],
     ['charizard × agua', ['water', ['fire', 'flying']], 2],
@@ -21,6 +21,55 @@ describe('getMultiplier (casos canónicos Gen 3)', () => {
 
   it.each(cases)('%s', (_label, [atk, def], expected) => {
     expect(getMultiplier(atk, def)).toBe(expected);
+  });
+});
+
+describe('Fairy type matchups', () => {
+  it('Fairy vs Dragon = 2x', () => {
+    expect(getMultiplier('fairy', ['dragon'])).toBe(2);
+  });
+
+  it('Fairy vs Fighting = 2x', () => {
+    expect(getMultiplier('fairy', ['fighting'])).toBe(2);
+  });
+
+  it('Fairy vs Dark = 2x', () => {
+    expect(getMultiplier('fairy', ['dark'])).toBe(2);
+  });
+
+  it('Poison vs Fairy = 2x', () => {
+    expect(getMultiplier('poison', ['fairy'])).toBe(2);
+  });
+
+  it('Steel vs Fairy = 2x', () => {
+    expect(getMultiplier('steel', ['fairy'])).toBe(2);
+  });
+
+  it('Fairy is immune to Dragon', () => {
+    expect(getMultiplier('dragon', ['fairy'])).toBe(0);
+  });
+
+  it('Fairy resists Fighting (0.5x)', () => {
+    expect(getMultiplier('fighting', ['fairy'])).toBe(0.5);
+  });
+
+  it('Fairy resists Bug (0.5x)', () => {
+    expect(getMultiplier('bug', ['fairy'])).toBe(0.5);
+  });
+
+  it('Fairy resists Dark (0.5x)', () => {
+    expect(getMultiplier('dark', ['fairy'])).toBe(0.5);
+  });
+
+  it('Gardevoir (Psychic/Fairy) weak to Poison and Steel', () => {
+    expect(getMultiplier('poison', ['psychic', 'fairy'])).toBe(2);
+    expect(getMultiplier('steel', ['psychic', 'fairy'])).toBe(2);
+  });
+
+  it('Garchomp (Dragon/Ground) immune to Electric, weak to Fairy/Ice/Dragon', () => {
+    expect(getMultiplier('electric', ['dragon', 'ground'])).toBe(0);
+    expect(getMultiplier('fairy', ['dragon', 'ground'])).toBe(2);
+    expect(getMultiplier('ice', ['dragon', 'ground'])).toBe(4);
   });
 });
 
@@ -44,12 +93,18 @@ describe('analyzeDefensive + groupByCategory', () => {
     expect([...groups.double.map((e) => e.type)].sort()).toEqual(['electric', 'water']);
     expect(groups.immune.map((e) => e.type)).toEqual(['ground']);
     const total = Object.values(groups).reduce((n, list) => n + list.length, 0);
-    expect(total).toBe(17);
+    expect(total).toBe(18);
   });
 
   it('Swampert es inmune a eléctrico y muy débil a planta', () => {
     const groups = groupByCategory(analyzeDefensive(['water', 'ground']));
     expect(groups.immune.map((e) => e.type)).toEqual(['electric']);
     expect(groups.quad.map((e) => e.type)).toEqual(['grass']);
+  });
+
+  it('Sylveon (Fairy) resists Fighting, Bug, Dark; immune to Dragon', () => {
+    const groups = groupByCategory(analyzeDefensive(['fairy']));
+    expect(groups.immune.map((e) => e.type)).toEqual(['dragon']);
+    expect(groups.half.map((e) => e.type).sort()).toEqual(['bug', 'dark', 'fighting']);
   });
 });

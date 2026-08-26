@@ -1,6 +1,6 @@
-import { MAX_DEX, POKEMON_TYPES, type Pokemon, type TypeName } from '../domain/pokemon';
+import { MAX_DEX, POKEMON_TYPES, type Pokemon, type TypeName, type PokemonMove } from '../domain/pokemon';
 
-export type PokeErrorCode = 'notfound' | 'gen3' | 'network';
+export type PokeErrorCode = 'notfound' | 'network';
 
 export class PokeApiError extends Error {
   readonly code: PokeErrorCode;
@@ -13,8 +13,8 @@ export class PokeApiError extends Error {
 }
 
 const API_BASE = 'https://pokeapi.co/api/v2';
-const CACHE_KEY = 'ptc-cache-v1';
-const NAMELIST_KEY = 'namelist-v1';
+const CACHE_KEY = 'ptc-cache-v2';
+const NAMELIST_KEY = 'namelist-v2';
 
 export interface NameEntry {
   name: string;
@@ -93,38 +93,17 @@ export function normalizeQuery(raw: string): string {
   const q = raw.trim();
   if (/^\d+$/.test(q)) {
     const n = parseInt(q, 10);
-    if (n > MAX_DEX) throw new PokeApiError('gen3');
+    if (n > MAX_DEX) throw new PokeApiError('notfound');
     return String(n);
   }
   return q
     .toLowerCase()
-    .replace(/[.’']+/g, '')
+    .replace(/[.'']+/g, '')
     .replace(/♀/g, '-f')
     .replace(/♂/g, '-m')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
 }
-
-const GEN3_TYPE_FIXES: Partial<Record<number, readonly TypeName[]>> = {
-  35: ['normal'],
-  36: ['normal'],
-  39: ['normal'],
-  40: ['normal'],
-  122: ['psychic'],
-  173: ['normal'],
-  174: ['normal'],
-  175: ['normal'],
-  176: ['normal', 'flying'],
-  183: ['water'],
-  184: ['water'],
-  209: ['normal'],
-  210: ['normal'],
-  280: ['psychic'],
-  281: ['psychic'],
-  282: ['psychic'],
-  298: ['normal'],
-  303: ['steel']
-};
 
 interface RawPokemon {
   id: number;
@@ -135,6 +114,22 @@ interface RawPokemon {
     front_default: string | null;
     back_default: string | null;
     versions?: {
+      'generation-v'?: {
+        'black-white'?: {
+          animated?: {
+            front_default: string | null;
+            back_default: string | null;
+          };
+          front_default: string | null;
+          back_default: string | null;
+        };
+      };
+      'generation-iv'?: {
+        'diamond-pearl'?: {
+          front_default: string | null;
+          back_default: string | null;
+        };
+      };
       'generation-iii'?: {
         'firered-leafgreen'?: {
           front_default: string | null;
@@ -143,6 +138,14 @@ interface RawPokemon {
       };
     };
   };
+  moves?: Array<{
+    move: { name: string; url: string };
+    version_group_details: Array<{
+      level_learned_at: number;
+      move_learn_method: { name: string };
+      version_group: { name: string };
+    }>;
+  }>;
 }
 
 interface RawSpecies {
@@ -151,6 +154,26 @@ interface RawSpecies {
 
 function toTypeName(name: string): TypeName | null {
   return (POKEMON_TYPES as readonly string[]).includes(name) ? (name as TypeName) : null;
+}
+
+function selectSprites(sprites: RawPokemon['sprites']): { front: string | null; back: string | null } {
+  const bw = sprites.versions?.['generation-v']?.['black-white'];
+  const animated = bw?.animated;
+  if (animated?.front_default) {
+    return { front: animated.front_default, back: animated.back_default ?? null };
+  }
+  if (bw?.front_default) {
+    return { front: bw.front_default, back: bw.back_default ?? null };
+  }
+  const dp = sprites.versions?.['generation-iv']?.['diamond-pearl'];
+  if (dp?.front_default) {
+    return { front: dp.front_default, back: dp.back_default ?? null };
+  }
+  const frlg = sprites.versions?.['generation-iii']?.['firered-leafgreen'];
+  if (frlg?.front_default) {
+    return { front: frlg.front_default, back: frlg.back_default ?? null };
+  }
+  return { front: sprites.front_default, back: sprites.back_default ?? null };
 }
 
 async function getSpecies(id: number): Promise<{ es: string; en: string }> {
@@ -176,27 +199,37 @@ export async function getPokemon(query: string): Promise<Pokemon> {
   if (cached) return cached as Pokemon;
 
   const data = await fetchJson<RawPokemon>(`${API_BASE}/pokemon/${encodeURIComponent(norm)}`);
-  if (data.id > MAX_DEX) throw new PokeApiError('gen3');
+  if (data.id > MAX_DEX) throw new PokeApiError('notfound');
 
   const species = await getSpecies(data.id);
-  const g3 = data.sprites.versions?.['generation-iii']?.['firered-leafgreen'];
-  const fixedTypes = GEN3_TYPE_FIXES[data.id];
+  const { front, back } = selectSprites(data.sprites);
 
-  let types: TypeName[] = fixedTypes
-    ? [...fixedTypes]
-    : data.types.map((t) => toTypeName(t.type.name)).filter((t): t is TypeName => t !== null);
+  let types: TypeName[] = data.types.map((t) => toTypeName(t.type.name)).filter((t): t is TypeName => t !== null);
   if (types.length === 0) types = ['normal'];
 
   const rawStats: Partial<Record<string, number>> = {};
   for (const s of data.stats) rawStats[s.stat.name] = s.base_stat;
+
+  const latestVersion = 'scarlet-violet';
+  const pokemonMoves: PokemonMove[] = (data.moves || []).map(m => {
+    const details = m.version_group_details.find(d => d.version_group.name === latestVersion)
+      || m.version_group_details[m.version_group_details.length - 1];
+    return {
+      name: m.move.name,
+      url: m.move.url,
+      learnMethod: details?.move_learn_method.name ?? 'unknown',
+      levelLearnedAt: details?.level_learned_at ?? 0,
+      versionGroup: details?.version_group.name ?? 'unknown'
+    };
+  }).filter(m => m.learnMethod === 'level-up' || m.learnMethod === 'machine' || m.learnMethod === 'tutor');
 
   const pokemon: Pokemon = {
     id: data.id,
     nameEn: data.name,
     nameEs: species.es || data.name,
     types,
-    spriteFront: g3?.front_default ?? data.sprites.front_default,
-    spriteBack: g3?.back_default ?? data.sprites.back_default ?? null,
+    spriteFront: front,
+    spriteBack: back,
     stats: {
       hp: rawStats.hp ?? 0,
       attack: rawStats.attack ?? 0,
@@ -204,7 +237,8 @@ export async function getPokemon(query: string): Promise<Pokemon> {
       spAtk: rawStats['special-attack'] ?? 0,
       spDef: rawStats['special-defense'] ?? 0,
       speed: rawStats.speed ?? 0
-    }
+    },
+    moves: pokemonMoves
   };
 
   memCache.set(key, pokemon);

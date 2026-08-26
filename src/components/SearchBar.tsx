@@ -7,9 +7,10 @@ interface SearchBarProps {
   names: NameEntry[];
   busy: boolean;
   onSubmit: (query: string) => void;
+  placeholder?: string;
 }
 
-export function SearchBar({ names, busy, onSubmit }: SearchBarProps) {
+export function SearchBar({ names, busy, onSubmit, placeholder }: SearchBarProps) {
   const { t } = useLanguage();
   const [value, setValue] = useState('');
 
@@ -27,7 +28,7 @@ export function SearchBar({ names, busy, onSubmit }: SearchBarProps) {
           value={value}
           disabled={busy}
           onChange={(e) => setValue(e.target.value)}
-          placeholder={t.searchPlaceholder}
+          placeholder={placeholder ?? t.searchPlaceholder}
           className="min-w-48 flex-1 rounded-md border-[3px] border-gba-blue-dark bg-white px-2.5 py-2.5 font-pixel text-[10px] text-gba-ink shadow-inner outline-none focus:ring-4 focus:ring-yellow-300 disabled:opacity-60"
         />
         <datalist id="pokemon-list">
