@@ -33,8 +33,6 @@ function errorMessage(t: Strings, code: SearchError): string {
   }
 }
 
-type Tab = 'analyze' | 'simulate';
-
 export default function App() {
   return (
     <LanguageProvider>
@@ -49,7 +47,6 @@ function Calculator() {
   const [initialQuery] = useState<string>(readLastId);
   const search = usePokemon(initialQuery);
   const busy = search.status === 'loading';
-  const [tab, setTab] = useState<Tab>('analyze');
   const [defenderQuery, setDefenderQuery] = useState('');
 
   useEffect(() => {
@@ -85,36 +82,10 @@ function Calculator() {
       <Header />
       <SearchBar names={names} busy={busy} onSubmit={search.search} />
 
-      {/* Tab Switcher */}
-      {search.pokemon && (
-        <div className="flex gap-2">
-          <button
-            onClick={() => setTab('analyze')}
-            className={`flex-1 rounded-lg border-3 py-2 text-[10px] font-normal transition-colors ${
-              tab === 'analyze'
-                ? 'border-gba-blue bg-gba-blue text-white shadow-[0_2px_0_0_var(--color-gba-navy)]'
-                : 'border-gba-blue-dark bg-gba-beige text-gba-blue-dark hover:bg-gba-blue-light'
-            }`}
-          >
-            {t.tabAnalyze}
-          </button>
-          <button
-            onClick={() => setTab('simulate')}
-            className={`flex-1 rounded-lg border-3 py-2 text-[10px] font-normal transition-colors ${
-              tab === 'simulate'
-                ? 'border-gba-blue bg-gba-blue text-white shadow-[0_2px_0_0_var(--color-gba-navy)]'
-                : 'border-gba-blue-dark bg-gba-beige text-gba-blue-dark hover:bg-gba-blue-light'
-            }`}
-          >
-            {t.tabSimulate}
-          </button>
-        </div>
-      )}
-
       {search.pokemon && <BattleScene pokemon={search.pokemon} />}
       <MessageDialog text={message} />
 
-      {search.pokemon && tab === 'analyze' && (
+      {search.pokemon && (
         <>
           <StatsPanel pokemon={search.pokemon} />
           <EffectivenessPanel
@@ -133,12 +104,6 @@ function Calculator() {
             lang={lang}
             offensive={true}
           />
-        </>
-      )}
-
-      {search.pokemon && tab === 'simulate' && (
-        <>
-          <StatsPanel pokemon={search.pokemon} />
           <SearchBar
             names={names}
             busy={busy}

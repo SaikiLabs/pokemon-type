@@ -1,4 +1,5 @@
 import { MAX_DEX, POKEMON_TYPES, type Pokemon, type TypeName, type PokemonMove } from '../domain/pokemon';
+import { POKEMON_NAMES_ES } from '../data/pokemonNamesEs';
 
 export type PokeErrorCode = 'notfound' | 'network';
 
@@ -18,6 +19,7 @@ const NAMELIST_KEY = 'namelist-v2';
 
 export interface NameEntry {
   name: string;
+  nameEs: string;
   id: number;
 }
 
@@ -257,6 +259,7 @@ export async function getNameList(): Promise<NameEntry[]> {
   const data = await fetchJson<RawNameList>(`${API_BASE}/pokemon?limit=${MAX_DEX}`);
   const list = data.results.map((r) => ({
     name: r.name,
+    nameEs: POKEMON_NAMES_ES[r.name] ?? r.name,
     id: parseInt(r.url.split('/').filter(Boolean).pop() ?? '0', 10)
   }));
   memCache.set(NAMELIST_KEY, list);

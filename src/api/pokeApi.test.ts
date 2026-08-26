@@ -186,8 +186,8 @@ describe('getNameList', () => {
     }));
     const list = await getNameList();
     expect(list).toEqual([
-      { name: 'bulbasaur', id: 1 },
-      { name: 'ivysaur', id: 2 }
+      { name: 'bulbasaur', nameEs: 'Bulbasaur', id: 1 },
+      { name: 'ivysaur', nameEs: 'Ivysaur', id: 2 }
     ]);
   });
 });

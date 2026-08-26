@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Pokemon, Move, IVs, EVs, Nature, BattleConfig } from '../domain/pokemon';
 import { useLanguage } from '../hooks/useLanguage';
 import { DialogBox } from './DialogBox';
+import { DualBattleScene } from './DualBattleScene';
 import { calculateDamage, findBestMoves } from '../engine/damageCalculator';
 import { calculateAllStats } from '../engine/statCalculator';
 import { NATURES } from '../data/natures';
@@ -53,6 +54,14 @@ export function BattleSimulator({ attacker, defender }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Battle Scene */}
+      <DualBattleScene
+        attacker={attacker}
+        defender={defender}
+        defenderHP={defStats.hp}
+        defenderDamage={result?.avgDamage ?? 0}
+      />
+
       {/* Attacker Config */}
       <DialogBox>
         <div className="mb-2 flex items-center gap-2">

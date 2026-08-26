@@ -50,6 +50,8 @@ export interface Strings {
   status: string;
   priority: string;
   bestMoves: string;
+  yourPokemon: string;
+  rivalPokemon: string;
 }
 
 export const STRINGS: Record<Lang, Strings> = {
@@ -121,7 +123,9 @@ export const STRINGS: Record<Lang, Strings> = {
     special: 'ESP.',
     status: 'ESTADO',
     priority: 'PRIOR.',
-    bestMoves: 'MEJORES MOVIMIENTOS'
+    bestMoves: 'MEJORES MOVIMIENTOS',
+    yourPokemon: 'TU POKéMON',
+    rivalPokemon: 'RIVAL'
   },
   en: {
     docTitle: 'Universal Pokémon Calculator',
@@ -191,7 +195,9 @@ export const STRINGS: Record<Lang, Strings> = {
     special: 'SPEC',
     status: 'STATUS',
     priority: 'PRIOR',
-    bestMoves: 'BEST MOVES'
+    bestMoves: 'BEST MOVES',
+    yourPokemon: 'YOUR POKéMON',
+    rivalPokemon: 'RIVAL'
   }
 };
 

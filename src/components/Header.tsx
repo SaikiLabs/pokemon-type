@@ -11,7 +11,7 @@ export function Header() {
         <h1 className="text-[15px] leading-relaxed text-gba-beige [text-shadow:2px_2px_0_#10301a,4px_4px_0_rgba(0,0,0,.35)]">
           Pokémon <span className="text-yellow-300">Type Calculator</span>
         </h1>
-        <p className="mt-2 text-[8px] text-lime-100/90">Kanto · Johto · Hoenn (1–386)</p>
+        <p className="mt-2 text-[8px] text-lime-100/90">Kanto · Johto · Hoenn · Sinnoh · Unova · Kalos · Alola · Galar · Paldea (1–1025)</p>
       </div>
       <div className="flex overflow-hidden rounded-md border-[3px] border-[#10301a] bg-gba-beige">
         {LANGS.map((l) => (

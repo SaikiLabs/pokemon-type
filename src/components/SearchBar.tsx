@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import type { NameEntry } from '../api/pokeApi';
+import { resolveEnglishName } from '../data/pokemonNamesEs';
 import { useLanguage } from '../hooks/useLanguage';
 import { DialogBox } from './DialogBox';
 
@@ -11,12 +12,25 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ names, busy, onSubmit, placeholder }: SearchBarProps) {
-  const { t } = useLanguage();
+  const { lang, t } = useLanguage();
   const [value, setValue] = useState('');
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    onSubmit(value);
+    const q = value.trim();
+    if (!q) {
+      onSubmit(q);
+      return;
+    }
+    if (/^\d+$/.test(q)) {
+      onSubmit(q);
+      return;
+    }
+    if (lang === 'es') {
+      onSubmit(resolveEnglishName(q));
+    } else {
+      onSubmit(q);
+    }
   }
 
   return (
@@ -33,7 +47,7 @@ export function SearchBar({ names, busy, onSubmit, placeholder }: SearchBarProps
         />
         <datalist id="pokemon-list">
           {names.map((n) => (
-            <option key={n.id} value={n.name} />
+            <option key={n.id} value={lang === 'es' ? n.nameEs : n.name} />
           ))}
         </datalist>
         <button
